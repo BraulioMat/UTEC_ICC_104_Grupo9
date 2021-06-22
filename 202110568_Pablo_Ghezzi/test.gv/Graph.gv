@@ -1,0 +1,5 @@
+graph {
+	US -- Peru
+	Peru -- Bolivia
+	Bolivia -- US
+}
