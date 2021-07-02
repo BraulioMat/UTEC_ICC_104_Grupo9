@@ -6,12 +6,12 @@ pygame.display.set_caption("PONG")
 negro = (0,0,0)
 blanco = (255,255,255)
 tamanho_pantalla = (800,600)
-font = pygame.font.Font('freesansbold.ttf', 32)
 ancho_jugador = 15
 alto_jugador = 90
 
 #------------------------------------------------
 #Tarea ACA
+font = pygame.font.SysFont('calibri', 32)
 fps = 60
 games = 0
 #------------------------------------------------
