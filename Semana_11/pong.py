@@ -95,6 +95,8 @@ while not game_over:
         games += 1
         if games > 0 and games%2 == 0:
             fps += 1
+    if jugador1_score >= 10 or jugador2_score >= 10:
+        game_over = True
 
     #Mover a los jugadores
     jugador1_y += mov_jugador1
