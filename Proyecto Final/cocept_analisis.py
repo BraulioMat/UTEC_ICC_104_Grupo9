@@ -28,7 +28,6 @@ def for_for(origin, destination, graph, log = []):
     return sorted(cont, key = len)[0]
 
 ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
-print(ex)
 origin = 'A'
 destination = 'H'
 #print(for_for(origin, destination, ex))
@@ -45,7 +44,7 @@ def dijkstra(origin, destination, graph, log = [], first = True):
     if first:
         log = {x: float('inf') for x in graph.keys()} # 1.Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
         log[origin] = 0 # 2.Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes. Set the initial node as current.
-    # If the destination node has been marked visited 
+    # 5. If the destination node has been marked visited 
     # (when planning a route between two specific nodes) or 
     # if the smallest tentative distance among the nodes in the 
     # unvisited set is infinity (when planning a complete traversal; 
@@ -53,7 +52,6 @@ def dijkstra(origin, destination, graph, log = [], first = True):
     # then stop. The algorithm has finished.
     if destination in graph[origin]:
         return log[origin] + graph[origin][destination]
-    print(origin)
     # 3. For the current node, consider all of its unvisited neighbours and calculate their 
     # tentative distances through the current node. Compare the newly calculated tentative 
     # distance to the current assigned value and assign the smaller one. For example, 
@@ -63,36 +61,50 @@ def dijkstra(origin, destination, graph, log = [], first = True):
     for x in graph[origin]:
         if x in log.keys():
             log[x] = min(log[origin] + graph[origin][x], graph[origin][x])
-    # When we are done considering all of the unvisited neighbours
+    # 4. When we are done considering all of the unvisited neighbours
     # of the current node, mark the current node as visited and 
     # remove it from the unvisited set. A visited node will never be checked again.
     log.pop(origin)
     new_origin = min(log)
-    print(new_origin)
-    print(log)
-    input()
     if log.get(new_origin) == None:
         return None
-    #Otherwise, select the unvisited node that is marked with the smallest tentative distance, 
+    # 6. Otherwise, select the unvisited node that is marked with the smallest tentative distance, 
     # set it as the new "current node", and go back to step 3.
     return dijkstra(new_origin, destination, graph, log=log, first = False)
 
-print(dijkstra(origin, destination, ex))
+#print(dijkstra(origin, destination, ex))
 
-#Opcion 3: A* algorithm
-def astar(origin, destination, graph):
-    pass
+#pt, mod for our purposes
 
-#Opcion 4: Floyd–Warshall algorithm
-def floydWarshall(origin, destination, graph):
-    pass
+print(ex)
 
-#Opcion 5: Johnson's algorithm
-def johnson(origin, destination, graph):
-    pass
+def dijkstra(origin, destination, graph, log = [], first = True):
+    if first:
+        log = {x: [float('inf'),[]] for x in graph.keys()} # Now contain extra information
+        log[origin][0] = 0
+    if destination in graph[origin]:
+        log[destination][0] = log[origin][0] + graph[origin][destination]
+        log[destination][1] = log[origin][1] + [origin]
+        return log
+    for x in graph[origin]:
+        if x in log.keys(): # Modded to work with new changes
+            if log[origin][0] + graph[origin][x] <= graph[origin][x]:
+                log[x][0] = log[origin][0] + graph[origin][x]
+                log[x][1] = log[origin][1] + [origin]
+            elif log[origin][0] + graph[origin][x] > graph[origin][x]:
+                pass
+    log.pop(origin)
+    new_origin = min(log)
+    if log.get(new_origin) == None:
+        return None
+    return dijkstra(new_origin, destination, graph, log=log, first = False)
 
+path = dijkstra(origin, destination, ex)[destination][1]
 
-#Opcion 6: Viterbi algorithm
-def viterbi(origin, destination, graph):
-    pass
-
+sum = 0
+current = ex[origin]
+path = path [1:] + [destination]
+for x in path:
+    sum  += current[x]
+    current = ex[x]
+print(sum)
