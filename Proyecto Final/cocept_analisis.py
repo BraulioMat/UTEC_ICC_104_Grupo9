@@ -80,7 +80,7 @@ print(ex)
 
 def dijkstra(origin, destination, graph, log = [], first = True):
     if first:
-        log = {x: [float('inf'),[]] for x in graph.keys()} # Now contain extra information
+        log = {x: [float('inf'),[]] for x in graph.keys()} # Now contains extra information
         log[origin][0] = 0
     if destination in graph[origin]:
         log[destination][0] = log[origin][0] + graph[origin][destination]
@@ -108,3 +108,6 @@ for x in path:
     sum  += current[x]
     current = ex[x]
 print(sum)
+
+# Once generated the grafix, this with output
+# the shortest path via the algoritm
