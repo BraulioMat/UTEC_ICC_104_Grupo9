@@ -2,6 +2,7 @@
 #origin : {destination1 : time, destination2 : time, destination3 : time}
 #if l not in (dic.get(l) if dic.get(l) != None else []) if l != x
 
+from graphviz import Graph, Digraph
 import random as rd
 
 def random_generate_edge(n):
@@ -27,16 +28,17 @@ def for_for(origin, destination, graph, log = []):
         print(cont)
     return sorted(cont, key = len)[0]
 
-ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+#ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+#print(ex)
 origin = 'A'
-destination = 'H'
+destination = 'E'
 #print(for_for(origin, destination, ex))
 # OPCION Terrible O(n^n), even acounting for no usage of comparators of distance
 #Opcion 2: Dijkstra's algorithm
  #Using recursion, the shortest path is created
  #May need to modify as only finds value of shortest path
 
-ex = {'A': {'B': 3, 'C': 7, 'D': 7, 'E': 10, 'G': 7}, 'B': {'A': 3}, 'C': {'A': 7, 'F': 3, 'G': 4, 'H': 10}, 'D': {'A': 7, 'E': 3, 'F': 2, 'G': 3}, 'E': {'A': 10, 'D': 3}, 'F': {'C': 3, 'D': 2}, 'G': {'C': 4, 'D': 3, 'A': 7}, 'H': {'C': 10}}
+#ex = {'E': {'D': 6, 'F': 5}, 'D': {'E': 6, 'F': 9}, 'F': {'C': 4, 'D': 9, 'E': 5, 'G': 6, 'H': 6}, 'C': {'F': 4}, 'G': {'F': 6}, 'H': {'F': 6}}
 
 # Basic outline https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 
@@ -76,31 +78,43 @@ def dijkstra(origin, destination, graph, log = [], first = True):
 
 #pt, mod for our purposes
 
-print(ex)
-
 def dijkstra(origin, destination, graph, log = [], first = True):
     if first:
         log = {x: [float('inf'),[]] for x in graph.keys()} # Now contains extra information
+        if not(origin in log):
+          return None, None
         log[origin][0] = 0
     if destination in graph[origin]:
         log[destination][0] = log[origin][0] + graph[origin][destination]
-        log[destination][1] = log[origin][1] + [origin]
+        log[destination][1] = log[origin][1] + [origin] + [destination]
         return log
     for x in graph[origin]:
         if x in log.keys(): # Modded to work with new changes
-            if log[origin][0] + graph[origin][x] <= graph[origin][x]:
+            if log[origin][0] + graph[origin][x] <= log[x][0]:
                 log[x][0] = log[origin][0] + graph[origin][x]
                 log[x][1] = log[origin][1] + [origin]
-            elif log[origin][0] + graph[origin][x] > graph[origin][x]:
+            elif log[origin][0] + graph[origin][x] > log[x][0]:
                 pass
     log.pop(origin)
-    new_origin = min(log)
+    new_origin = min(log, key= lambda x: log[x][0], default = None)
     if log.get(new_origin) == None:
         return None
-    return dijkstra(new_origin, destination, graph, log=log, first = False)
+    return dijkstra(new_origin, destination, graph, log = log, first = False)
 
-path = dijkstra(origin, destination, ex)[destination][1]
+#path = dijkstra(origin, destination, ex)[destination][1]
 
+#Needs work
+def nodifing(dic):
+  out = dic.copy()
+  for x in dic.keys():
+    for y in dic[x].keys():
+      if dic.get(y) == None:
+        out[y] = {}
+      out[y][x] = out[x][y]
+  return out
+
+
+"""
 sum = 0
 current = ex[origin]
 path = path [1:] + [destination]
@@ -108,6 +122,39 @@ for x in path:
     sum  += current[x]
     current = ex[x]
 print(sum)
+"""
 
 # Once generated the grafix, this with output
 # the shortest path via the algoritm
+# Lets test this out
+
+ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+if origin not in ex and destination not in ex:
+  ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+
+print({x: {} for x in ['A','B','C','D','E','F']})
+ex = {'A':{'B':7, 'C':9, 'F':14}, 'F':{'E':9}, 'D':{'B':15, 'E':6}}
+#WIKI EXAMPLE
+ex = {'A': {'B':7, 'C':9, 'F':14}, 'B': {'A':7, 'D':15 }, 'C': {'B':10, 'A':9, 'F':2, 'D':11}, 'D': {'B':15, 'C':11, 'E' : 6}, 'E': {'D' : 6, 'C':11, 'B':15}, 'F': {'A':14, 'C':2, 'E':9}}
+print(ex)
+input()
+origin = 'A'
+destination = 'E'
+
+g = Graph(strict=True)
+
+for x in ex.keys():
+  for y in ex[x]:
+    g.edge(x, y, label = str(ex[x][y]))
+
+distance, path = dijkstra(origin, destination, ex)[destination]
+
+print(ex)
+print(path)
+print(f"Origen = {origin}, Destino = {destination}")
+print(f"Distancia: {distance}")
+
+for x in range(len(path)-1):
+  g.edge(path[x], path[x+1],color='red')
+
+g
