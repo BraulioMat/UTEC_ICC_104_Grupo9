@@ -4,6 +4,7 @@
 
 from graphviz import Graph, Digraph
 import random as rd
+import time
 
 def random_generate_edge(n):
     dic = {}
@@ -12,7 +13,7 @@ def random_generate_edge(n):
             if dic.get(x) == None:
                 dic[x] = {}
             if y not in (dic.get(x) if dic.get(x) != None else {}).keys() and x != y:
-                dic[x][y] = rd.randint(1,10)
+                dic[x][y] = rd.randint(1,100)
                 if dic.get(y) == None:
                     dic[y] = {}
                 dic[y][x] = dic[x][y] 
@@ -75,11 +76,12 @@ def dijkstra(origin, destination, graph, log = [], first = True):
 
 #pt, mod for our purposes
 
+#DISTANCE IN MIN
 def dijkstra(origin, destination, graph, log = [], first = True):
     if first:
         log = {x: [float('inf'),[]] for x in graph.keys()} # Now contains extra information
         if not(origin in log):
-          return None, None
+          return None
         log[origin][0] = 0
     if destination == origin:
         log[destination][1] = log[origin][1] + [destination]
@@ -98,6 +100,27 @@ def dijkstra(origin, destination, graph, log = [], first = True):
 #path = dijkstra(origin, destination, ex)[destination][1]
 
 
+def dijkstra_iter(origin, destination, graph, log = []):
+    log = {x: [float('inf'),[]] for x in graph.keys()} # Now contains extra information
+    if not(origin in log):
+        return None
+    log[origin][0] = 0
+    while True:
+        if destination == origin:
+            log[destination][1] = log[origin][1] + [destination]
+            return log
+        for x in graph[origin]:
+            if x in log.keys(): # Modded to work with new changes
+                if log[origin][0] + graph[origin][x] <= log[x][0]:
+                    log[x][0] = log[origin][0] + graph[origin][x]
+                    log[x][1] = log[origin][1] + [origin]
+        log.pop(origin)
+        new_origin = min(log, key= lambda x: log[x][0], default = None)
+        if log.get(new_origin) == None:
+            return None
+        origin = new_origin
+
+
 """
 sum = 0
 current = ex[origin]
@@ -111,17 +134,23 @@ print(sum)
 # Once generated the grafviz, this with output
 # the shortest path via the algoritm
 # Lets test this out
-
-ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+"""
+ex = random_generate_edge(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
 if origin not in ex and destination not in ex:
-  ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
+  ex = random_generate_edge(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+"""
+
+ex = random_generate_edge(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1','2','3','4'])
+if origin not in ex and destination not in ex:
+  ex = random_generate_edge(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1','2','3','4'])
+
 
 # print({x: {} for x in ['A','B','C','D','E','F']})
 # ex = {'A':{'B':7, 'C':9, 'F':14}, 'F':{'E':9}, 'D':{'B':15, 'E':6}}
 # WIKI EXAMPLE
 # ex = {'A': {'B':7, 'C':9, 'F':14}, 'B': {'A':7, 'D':15 }, 'C': {'B':10, 'A':9, 'F':2, 'D':11}, 'D': {'B':15, 'C':11, 'E' : 6}, 'E': {'D' : 6, 'C':11, 'B':15}, 'F': {'A':14, 'C':2, 'E':9}}
 print(ex)
-ex = {'A': {'B': 8, 'C': 7, 'D': 9, 'E': 3, 'G': 7}, 'B': {'A': 8, 'G': 9}, 'C': {'A': 7, 'G': 10}, 'D': {'A': 9, 'H': 3}, 'E': {'A': 3, 'F': 9, 'H': 4}, 'F': {'E': 9, 'H': 1}, 'G': {'A': 7, 'B': 9, 'C': 10, 'H': 10}, 'H': {'D': 3, 'E': 4, 'F': 1, 'G': 10}}
+#ex = {'A': {'B': 8, 'C': 7, 'D': 9, 'E': 3, 'G': 7}, 'B': {'A': 8, 'G': 9}, 'C': {'A': 7, 'G': 10}, 'D': {'A': 9, 'H': 3}, 'E': {'A': 3, 'F': 9, 'H': 4}, 'F': {'E': 9, 'H': 1}, 'G': {'A': 7, 'B': 9, 'C': 10, 'H': 10}, 'H': {'D': 3, 'E': 4, 'F': 1, 'G': 10}}
 origin = 'A'
 destination = 'F'
 
@@ -131,19 +160,46 @@ for x in ex.keys():
   for y in ex[x]:
     g.edge(x, y, label = str(ex[x][y]))
 
-distance, path = dijkstra(origin, destination, ex).get(destination)
+if (temp := dijkstra(origin, destination, ex)) != None:
+    distance, path = temp.get(destination)
 
-print(ex)
-print(path)
-print(f"Origen = {origin}, Destino = {destination}")
-print(f"Distancia: {distance}")
+    print(ex)
+    print(path)
+    print(f"Origen = {origin}, Destino = {destination}")
+    print(f"Distancia: {distance}")
 
-for x in range(len(path)-1):
-  g.edge(path[x], path[x+1],color='red')
+    for x in range(len(path)-1):
+        g.edge(path[x], path[x+1],color='red')
 
 
-g.render('test-output/test_1.gv', view=True)  
+    g.render('test-output/test_1.gv')
+
+else:
+    print('No path found')
 
 #Now for a nodifier, turs a simple dic into a noder
 
+dic = {'A': {'B': 8, 'C': 7, 'D': 9, 'E': 3, 'G': 7}, 'B':{'C':10, 'D':3}}
+
 def nodifier(dic):
+    out = dic.copy()
+    for x in dic.keys():
+        for y in dic[x].keys():
+            if out.get(y) == None:
+                out[y] = {}
+            out[y][x] = out[x][y]
+    return out
+
+def check(dic):
+    return all([dic[x][y] == (dic.get(y) or {}).get(x) for x in dic.keys() for y in dic[x].keys()])
+
+def countvertixes(graph):
+    pass
+
+#TIme comp test
+start = time.time()
+dijkstra('A', 'E', ex)
+print("{0:.15f}".format(time.time() - start))
+start = time.time()
+dijkstra_iter('A', 'E', ex)
+print("{0:.15f}".format(time.time() - start))
