@@ -31,15 +31,12 @@ def for_for(origin, destination, graph, log = []):
 #ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
 #print(ex)
 origin = 'A'
-destination = 'E'
+destination = 'D'
 #print(for_for(origin, destination, ex))
 # OPCION Terrible O(n^n), even acounting for no usage of comparators of distance
 #Opcion 2: Dijkstra's algorithm
  #Using recursion, the shortest path is created
  #May need to modify as only finds value of shortest path
-
-#ex = {'E': {'D': 6, 'F': 5}, 'D': {'E': 6, 'F': 9}, 'F': {'C': 4, 'D': 9, 'E': 5, 'G': 6, 'H': 6}, 'C': {'F': 4}, 'G': {'F': 6}, 'H': {'F': 6}}
-
 # Basic outline https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 
 def dijkstra(origin, destination, graph, log = [], first = True):
@@ -52,8 +49,8 @@ def dijkstra(origin, destination, graph, log = [], first = True):
     # unvisited set is infinity (when planning a complete traversal; 
     # occurs when there is no connection between the initial node and remaining unvisited nodes), 
     # then stop. The algorithm has finished.
-    if destination in graph[origin]:
-        return log[origin] + graph[origin][destination]
+    if destination  == origin:
+        return log[origin]
     # 3. For the current node, consider all of its unvisited neighbours and calculate their 
     # tentative distances through the current node. Compare the newly calculated tentative 
     # distance to the current assigned value and assign the smaller one. For example, 
@@ -84,17 +81,14 @@ def dijkstra(origin, destination, graph, log = [], first = True):
         if not(origin in log):
           return None, None
         log[origin][0] = 0
-    if destination in graph[origin]:
-        log[destination][0] = log[origin][0] + graph[origin][destination]
-        log[destination][1] = log[origin][1] + [origin] + [destination]
+    if destination == origin:
+        log[destination][1] = log[origin][1] + [destination]
         return log
     for x in graph[origin]:
         if x in log.keys(): # Modded to work with new changes
             if log[origin][0] + graph[origin][x] <= log[x][0]:
                 log[x][0] = log[origin][0] + graph[origin][x]
                 log[x][1] = log[origin][1] + [origin]
-            elif log[origin][0] + graph[origin][x] > log[x][0]:
-                pass
     log.pop(origin)
     new_origin = min(log, key= lambda x: log[x][0], default = None)
     if log.get(new_origin) == None:
@@ -102,16 +96,6 @@ def dijkstra(origin, destination, graph, log = [], first = True):
     return dijkstra(new_origin, destination, graph, log = log, first = False)
 
 #path = dijkstra(origin, destination, ex)[destination][1]
-
-#Needs work
-def nodifing(dic):
-  out = dic.copy()
-  for x in dic.keys():
-    for y in dic[x].keys():
-      if dic.get(y) == None:
-        out[y] = {}
-      out[y][x] = out[x][y]
-  return out
 
 
 """
@@ -124,7 +108,7 @@ for x in path:
 print(sum)
 """
 
-# Once generated the grafix, this with output
+# Once generated the grafviz, this with output
 # the shortest path via the algoritm
 # Lets test this out
 
@@ -132,14 +116,14 @@ ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
 if origin not in ex and destination not in ex:
   ex = random_generate_edge(['A','B','C','D','E','F','G','H'])
 
-print({x: {} for x in ['A','B','C','D','E','F']})
-ex = {'A':{'B':7, 'C':9, 'F':14}, 'F':{'E':9}, 'D':{'B':15, 'E':6}}
-#WIKI EXAMPLE
-ex = {'A': {'B':7, 'C':9, 'F':14}, 'B': {'A':7, 'D':15 }, 'C': {'B':10, 'A':9, 'F':2, 'D':11}, 'D': {'B':15, 'C':11, 'E' : 6}, 'E': {'D' : 6, 'C':11, 'B':15}, 'F': {'A':14, 'C':2, 'E':9}}
+# print({x: {} for x in ['A','B','C','D','E','F']})
+# ex = {'A':{'B':7, 'C':9, 'F':14}, 'F':{'E':9}, 'D':{'B':15, 'E':6}}
+# WIKI EXAMPLE
+# ex = {'A': {'B':7, 'C':9, 'F':14}, 'B': {'A':7, 'D':15 }, 'C': {'B':10, 'A':9, 'F':2, 'D':11}, 'D': {'B':15, 'C':11, 'E' : 6}, 'E': {'D' : 6, 'C':11, 'B':15}, 'F': {'A':14, 'C':2, 'E':9}}
 print(ex)
-input()
+ex = {'A': {'B': 8, 'C': 7, 'D': 9, 'E': 3, 'G': 7}, 'B': {'A': 8, 'G': 9}, 'C': {'A': 7, 'G': 10}, 'D': {'A': 9, 'H': 3}, 'E': {'A': 3, 'F': 9, 'H': 4}, 'F': {'E': 9, 'H': 1}, 'G': {'A': 7, 'B': 9, 'C': 10, 'H': 10}, 'H': {'D': 3, 'E': 4, 'F': 1, 'G': 10}}
 origin = 'A'
-destination = 'E'
+destination = 'F'
 
 g = Graph(strict=True)
 
@@ -147,7 +131,7 @@ for x in ex.keys():
   for y in ex[x]:
     g.edge(x, y, label = str(ex[x][y]))
 
-distance, path = dijkstra(origin, destination, ex)[destination]
+distance, path = dijkstra(origin, destination, ex).get(destination)
 
 print(ex)
 print(path)
@@ -157,4 +141,9 @@ print(f"Distancia: {distance}")
 for x in range(len(path)-1):
   g.edge(path[x], path[x+1],color='red')
 
-g
+
+g.render('test-output/test_1.gv', view=True)  
+
+#Now for a nodifier, turs a simple dic into a noder
+
+def nodifier(dic):
