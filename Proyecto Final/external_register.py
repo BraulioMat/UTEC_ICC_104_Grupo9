@@ -1,21 +1,31 @@
-from hashlib import sha224
+from hashlib import sha512
+from csv import reader as csv_reader
+from config import FILENAME
+
+global login_user
+login_user = ''
+
+global pass_hashmap
+pass_hashmap = {}
 
 '''
 with open('users.csv', 'w+') as file:
-    file.write(sha224(b'lol').hexdigest())
+    file.write(sha512(b'lol').hexdigest())
 
 with open('users.csv', 'r') as file:
-    print(file.readline() == sha224(l.encode('utf-8')).hexdigest())
+    print(file.readline() == sha512(l.encode('utf-8')).hexdigest())
 '''
 
-global filename
-filename = 'users.csv'
-global username
-username = ''
+hash512 = lambda x: sha512(x.encode('utf-8')).hexdigest()
 
-def add(array, filename = filename):
-    with open(filename, 'a+') as file:
-        file.write(f"{','.join(array)}\n")
+def update(filename = FILENAME):
+    with open(filename, 'r') as file:
+        reader = csv_reader(file, delimiter=',')
+        pass_hashmap = {x[0]:x[1] for x in reader}
+    return pass_hashmap
+
+def add(array, filename = FILENAME):
+    with open(filename, 'a+') as file: file.write(f"{','.join(array)}\n")
 
 def select(start, end):
     while True:
@@ -24,45 +34,62 @@ def select(start, end):
             return int(inp)
         print('No valido')
 
-def valid(username, password, filename= filename):
-    with open(filename, 'r') as file:
-        for x in file:
-            temp = x.split(',')
-            if temp[0] == username:
-                print(sha224(password.encode('utf-8')).hexdigest())
-                return temp[1].strip('\n') == sha224(password.encode('utf-8')).hexdigest()
+def valid_login(username, password):
+    global pass_hashmap
+    for x in pass_hashmap.keys():
+        if x == username:
+            return pass_hashmap[x] == hash512(password)
+    return False
+
+def valid_register(username):
+    global pass_hashmap
+    return not(username in pass_hashmap)
 
 
 def menu():
+    global pass_hashmap
+    pass_hashmap = update()
     while True:
         print('1) Login\n2) Registrar\n3) Exit')
         inp = select(1,3)
         if inp == 1:
             if login():
-                return True
+                return login_user
         if inp == 2:
-            register()
+            if register():
+                update()
         if inp == 3:
-            return False
+            return None
 
 def login():
+    global login_user
     while True:
-        user = input('Please enter a username (press 0 to exit): ')
-        pas = input('Please enter a password (press 0 to exit): ')
-        if user.isdigit() and 0 <= int(user) <= 0:
+        username = input('Please enter a username (press 0 to exit): ')
+        if ( username.isdigit() and 0 == int(username) ):
             return False
-        if pas.isdigit() and 0 <= int(pas) <= 0:
+        password = input('Please enter a password (press 0 to exit): ')
+        if ( password.isdigit() and 0 == int(password) ):
             return False
-        if valid(user, pas):
-            username = user
+        if valid_login(username, password):
+            global login_user
+            login_user = username
             return True
         print('Invalid')
     
 
 def register():
-    user = input('Please create a username: ')
-    pas = input('Please create a password: ')
-    add([user, sha224(pas.encode('utf-8')).hexdigest()])
+    while True:
+        username = input('Please create a username (press 0 to exit): ')
+        if ( username.isdigit() and 0 == int(username) ):
+            return False
+        password = input('Please create a password (press 0 to exit): ')
+        if ( password.isdigit() and 0 == int(password) ):
+            return False
+        if valid_register(username):
+            add([username, hash512(password)])
+            pass_hashmap[username] = hash512(password)
+            return True
+        print('Invalid')
 
 if __name__ == '__main__':
     menu()

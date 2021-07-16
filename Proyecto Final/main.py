@@ -1,3 +1,7 @@
-print(float('inf') < 10000)
+import external_register
 
-print(1 or 10)
+
+if __name__ == '__main__':
+    print(external_register.menu())
+
+
