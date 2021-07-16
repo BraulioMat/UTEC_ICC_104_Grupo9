@@ -196,10 +196,17 @@ def check(dic):
 def countvertixes(graph):
     pass
 
+'''
+rec = 0
+itr = 0
 #TIme comp test
-start = time.time()
-dijkstra('A', 'E', ex)
-print("{0:.15f}".format(time.time() - start))
-start = time.time()
-dijkstra_iter('A', 'E', ex)
-print("{0:.15f}".format(time.time() - start))
+for x in range(1001):
+    start = time.time()
+    dijkstra('A', 'E', ex)
+    rec += time.time() - start
+    start = time.time()
+    dijkstra_iter('A', 'E', ex)
+    itr += time.time() - start
+
+print(rec/1000, itr/1000)
+'''
